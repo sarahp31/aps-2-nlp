@@ -44,8 +44,8 @@
 
     ```math
 
-    mathcal{L} = \frac{1}{n} \sum_{i=1}^{n} (X_i - \hat{X}_i)^2
-    
+    \mathcal{L} = \frac{1}{n} \sum_{i=1}^{n} (X_i - \hat{X}_i)^2
+
     ```
 
     encourages the model to capture essential features and reduce noise. This approach refined pre-trained embeddings to our dataset, enhancing relevance by focusing on significant features.
