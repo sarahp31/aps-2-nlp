@@ -9,7 +9,7 @@
 
 * **A description of the process to generate embeddings, including the neural network topology and hyperparameters**
     
-    We used OpenAI's text-embedding-3-large model to generate embeddings for job postings. Each job title and description became a 3072-dimensional vector. We then designed a denoising autoencoder, where the encoder reduces the input size from 3072 to 512 through layers of sizes 2048, 1024, and 512. The decoder reconstructs the original size through layers of sizes 1024, 2048, and 3072. The neural network’s structure is shown in the figure below.
+    We used OpenAI's text-embedding-3-large model to generate embeddings for job postings. Each job title and description became a 3072-dimensional vector. We then designed a denoising autoencoder, where the encoder reduces the input size from 3072 to 512 through layers of sizes 2048, 1024, and 512. The decoder reconstructs the original size through layers of sizes 1024, 2048, and 3072.
 
     ### Neural Network Topology
 
@@ -35,7 +35,7 @@
     - **Activation Function**: ReLU for each layer except the output layer
     - **Loss Function**: Mean Squared Error (MSE), as it’s typical for reconstruction tasks
     - **Optimizer**: Adam optimizer with:
-    - **Learning rate (`lr`)**: \(1 \times 10^{-3}\)
+    - **Learning rate (`lr`)**: $(1 \times 10^{-3})$
 
 
 * **A description of the training process, including a description of the loss function and why it makes sense to your problem**
@@ -48,32 +48,29 @@
 
     encourages the model to capture essential features and reduce noise. This approach refined pre-trained embeddings to our dataset, enhancing relevance by focusing on significant features.
 
-    -- remover ? --
-    where $X_i$ is the original embedding and $\hat{X}_i$ is the reconstructed embedding. Minimizing this loss function encourages the model to learn robust features that capture essential information while reducing noise.
-
-
-    We adapted pre-trained embeddings to our specific dataset, enhancing their relevance and reducing dimensionality. The use of a denoising autoencoder allowed us to refine the embeddings by learning to recover original embeddings from noisy inputs, thereby capturing the most significant features for our problem domain.
-    -- remover --
-
 
 ## Step 2: visualize your embeddings
 
 * **Figures showing the embeddings for pre-trained and tuned embeddings**
 
     ![Pre-trained t-SNE Embeddings](./images/Pre_trained_Embeddings.png)
-
     Figure 1: t-SNE visualization of pre-trained embeddings
-    ![Refined t-SNE Embeddings](./images/Refined_Embeddings.png)
 
+
+    ![Refined t-SNE Embeddings](./images/Refined_Embeddings.png)
     Figure 2: t-SNE visualization of refined embeddings
 
 * **Discussion on what can be seen in each figure, clusters and so on**
 
-    The pre-trained t-SNE embeddings display clearer, denser clusters with gaps, suggesting distinct themes based on job titles and descriptions. In contrast, the refined embeddings are more dispersed, likely due to changes in their semantic structure.
+    In Figure 1, the t-SNE visualization of pre-trained embeddings shows a dispersed distribution of data points, suggesting limited clustering in terms of job title and description similarity. This spread indicates that the pre-trained embeddings may not capture the nuances of job-specific information effectively. In Figure 2, however, the refined embeddings present a more structured layout with visible clusters, implying that similar job titles and descriptions are now closer together.
 
-    -- remover -- The pre-trained and refined t-SNE embeddings display clusters, but the pre-trained embeddings show clearer, denser groupings, with gaps between some clusters. This separation suggests that the pre-trained embeddings may capture distinct themes based on job titles and descriptions, while the refined embeddings appear more dispersed, possibly due to changes in their semantic structure. -- remover --
-
+    This clustering suggests that the refinement process has improved the embeddings' ability to differentiate and group similar job-related terms, making it more effective for categorizing or matching roles based on their job postings, for example.
 
 ## Step 3: test the search system
+
+* **Results for the three tests (test that yields 10 results, test that yields less than 10 results, test that yields something non-obvious)**
+
+
+
 
 
