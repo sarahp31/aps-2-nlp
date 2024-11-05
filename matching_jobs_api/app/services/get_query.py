@@ -87,12 +87,16 @@ index.add(job_embeddings_norm)
 
 @functools.lru_cache(maxsize=128)
 def generate_query_embedding(query_text):
-    response = client.embeddings.create(
-        input=[query_text], model="text-embedding-3-large"
-    )
-    query_embedding = response.data[0].embedding
-    query_embedding = np.array(query_embedding)
-    return query_embedding
+    try:
+        response = client.embeddings.create(
+            input=[query_text], model="text-embedding-3-large"
+        )
+        query_embedding = response.data[0].embedding
+        query_embedding = np.array(query_embedding)
+        return query_embedding
+    except Exception as e:
+        logger.error(f"Error generating query embedding: {e}")
+        return [0] * 3072
 
 
 # Function to process the query and return ranked jobs
