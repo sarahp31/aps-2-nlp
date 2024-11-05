@@ -74,7 +74,7 @@ model = DenoisingAutoencoder(input_size=embedding_size).to(device)
 criterion = nn.MSELoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
 
-# Training loop
+# Training
 NUM_EPOCHS = 20
 print("Starting training...")
 for epoch in range(NUM_EPOCHS):
