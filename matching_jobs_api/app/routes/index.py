@@ -9,7 +9,7 @@ index_bp = Blueprint("index_bp", __name__)
 @index_bp.route("/")
 def index():
     logger.debug("Index route called")
-    return {"message": "Welcome to APS 1 NLP API!", "status": "OK"}
+    return {"message": "Welcome to APS 2 NLP API! By Davi & Sarah", "status": "OK"}
 
 
 @index_bp.route("/query", methods=["GET"])
