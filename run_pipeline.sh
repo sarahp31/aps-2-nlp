@@ -4,6 +4,10 @@
 echo "Activating venv..."
 source venv/bin/activate
 
+# Install requirements
+echo "Installing requirements..."
+pip install -r requirements.txt
+
 # Run jobs_scraping script
 echo "Running jobs_scraping/main.py..."
 python jobs_scraping/main.py
