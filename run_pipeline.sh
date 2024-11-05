@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Activate venv python
+echo "Activating venv..."
+source venv/bin/activate
+
 # Run jobs_scraping script
 echo "Running jobs_scraping/main.py..."
 python jobs_scraping/main.py
