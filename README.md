@@ -16,11 +16,11 @@
     ```mermaid
     flowchart LR
     Input["3072 - Input Layer"]
-    E1["2048"]
-    E2["1024"]
+    E1["2048 - Hidden Layer"]
+    E2["1024 - Hidden Layer"]
     Latent["512 - Latent Space"]
-    D1["1024"]
-    D2["2048"]
+    D1["1024 - Hidden Layer"]
+    D2["2048 - Hidden Layer"]
     Output["3072 - Output Layer"]
 
     Input --> E1 --> E2 --> Latent
@@ -70,19 +70,19 @@
 * **Results for the three tests (test that yields 10 results, test that yields less than 10 results, test that yields something non-obvious)**
 
     ### Test that yields 10 results
-    Resume: Davi Reis - Sr Developer
-    Total Jobs: 10 results
-    Best Job: Tririga Infrastructure Engineer, Close Systems (Relevance: 0.970)
+    - Resume: Davi Reis - Sr Developer
+    - Total Jobs: 10 results
+    - Best Job: Tririga Infrastructure Engineer, Close Systems (Relevance: 0.970)
 
     ### Test that yields less than 10 results
-    Resume: Bob Miller - Recruiter
-    Total Jobs: 9 results
-    Best Job: Account Manager, Amazon Shipping (Relevance: 0.858)
+    - Resume: Bob Miller - Recruiter
+    - Total Jobs: 9 results
+    - Best Job: Account Manager, Amazon Shipping (Relevance: 0.858)
 
     ### Test that yields something non-obvious
-    Resume: Uibira Bernardi - Supply Chain
-    Total Jobs: 10 results
-    Best Job: Sr. Technical Vehicle Expert, Fixed Term Contract (FTC), Vehicle Change ManagementAutomation (Relevance: 0.936)
+    - Resume: Uibira Bernardi - Supply Chain
+    - Total Jobs: 10 results
+    - Best Job: Sr. Technical Vehicle Expert, Fixed Term Contract (FTC), Vehicle Change ManagementAutomation (Relevance: 0.936)
 
 ## Step 4: make it nicer!
 
