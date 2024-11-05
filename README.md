@@ -15,13 +15,13 @@
 
     ```mermaid
     flowchart LR
-    Input["3072\nInput Layer"]
+    Input["3072 - Input Layer"]
     E1["2048"]
     E2["1024"]
-    Latent["512\nLatent Space"]
+    Latent["512 - Latent Space"]
     D1["1024"]
     D2["2048"]
-    Output["3072\nOutput Layer"]
+    Output["3072 - Output Layer"]
 
     Input --> E1 --> E2 --> Latent
     Latent --> D1 --> D2 --> Output
