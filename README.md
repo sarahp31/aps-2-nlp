@@ -69,7 +69,26 @@
 
 * **Results for the three tests (test that yields 10 results, test that yields less than 10 results, test that yields something non-obvious)**
 
+    ### Test that yields 10 results
+    Resume: Davi Reis - Sr Developer
+    Total Jobs: 10 results
+    Best Job: Tririga Infrastructure Engineer, Close Systems (Relevance: 0.970)
 
+    ### Test that yields less than 10 results
+    Resume: Bob Miller - Recruiter
+    Total Jobs: 9 results
+    Best Job: Account Manager, Amazon Shipping (Relevance: 0.858)
 
+    ### Test that yields something non-obvious
+    Resume: Uibira Bernardi - Supply Chain
+    Total Jobs: 10 results
+    Best Job: Sr. Technical Vehicle Expert, Fixed Term Contract (FTC), Vehicle Change ManagementAutomation (Relevance: 0.936)
 
+## Step 4: make it nicer!
 
+### MLOPs Specialist:
+
+We improved the speed by moving model and data loading outside the function (to load in memory, not in each request) and caching OpenAI request. Additionally, we implemented FAISS for faster similarity search. Finally, wee create a pipeline that updates all job data and embeddings when git pull on the server (setup_git_hook.sh and run_pipeline.sh) and, if the model is updated, it will be retrained.
+
+![Time of response](./images/latency.png)
+Figure 3: Time of response

@@ -1,10 +1,14 @@
 import time
 import logging
+import functools
 import numpy as np
+import faiss
 import torch
 import torch.nn as nn
 from openai import OpenAI
 from app.sqlite3db import SQLPostingDatabase
+
+faiss.omp_set_num_threads(1)
 
 logger = logging.getLogger(__name__)
 
@@ -12,8 +16,9 @@ client = OpenAI()
 
 # Initialize the database driver
 driver = SQLPostingDatabase()
+
 # Load the refined embeddings
-reduced_embeddings = np.load("data/reduced_embeddings.npy")
+reduced_embeddings = np.load("data/reduced_embeddings.npy").astype("float32")
 
 
 # Load job data (titles and descriptions)
@@ -30,7 +35,57 @@ def get_jobs_data():
 data = get_jobs_data()
 
 
-# Function to generate embedding for the query
+# Define the DenoisingAutoencoder class
+class DenoisingAutoencoder(nn.Module):
+    def __init__(self, input_size=3072):
+        super(DenoisingAutoencoder, self).__init__()
+        # Encoder
+        self.encoder = nn.Sequential(
+            nn.Linear(input_size, 2048),
+            nn.ReLU(True),
+            nn.Linear(2048, 1024),
+            nn.ReLU(True),
+            nn.Linear(1024, 512),
+            nn.ReLU(True),
+        )
+        # Decoder
+        self.decoder = nn.Sequential(
+            nn.Linear(512, 1024),
+            nn.ReLU(True),
+            nn.Linear(1024, 2048),
+            nn.ReLU(True),
+            nn.Linear(2048, input_size),
+        )
+
+    def forward(self, x):
+        encoded = self.encoder(x)
+        decoded = self.decoder(encoded)
+        return decoded
+
+
+# Initialize the model and load weights
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+model = DenoisingAutoencoder(input_size=3072).to(device)
+model.load_state_dict(torch.load("data/denoising_autoencoder.pth", map_location=device))
+model.eval()
+logger.info("Model loaded successfully.")
+
+
+# Precompute normalized job embeddings
+def normalize_embeddings(embeddings):
+    norms = np.linalg.norm(embeddings, axis=1, keepdims=True)
+    return embeddings / norms
+
+
+job_embeddings_norm = normalize_embeddings(reduced_embeddings)
+
+# Build FAISS index for similarity search
+d = reduced_embeddings.shape[1]
+index = faiss.IndexFlatIP(d)
+index.add(job_embeddings_norm)
+
+
+@functools.lru_cache(maxsize=128)
 def generate_query_embedding(query_text):
     response = client.embeddings.create(
         input=[query_text], model="text-embedding-3-large"
@@ -44,49 +99,10 @@ def generate_query_embedding(query_text):
 def get_query(query: str, threshold=0.33, top_n=10):
     start_time = time.time()
     # Generate embedding for the query
-    logger.info("Generating embedding for the query...")
     query_embedding = generate_query_embedding(query)
 
     # Convert to torch tensor
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     query_embedding_tensor = torch.FloatTensor(query_embedding).to(device)
-
-    # Load the trained autoencoder model
-    embedding_size = reduced_embeddings.shape[1]
-
-    class DenoisingAutoencoder(nn.Module):
-        def __init__(self, input_size=3072):
-            super(DenoisingAutoencoder, self).__init__()
-            # Encoder
-            self.encoder = nn.Sequential(
-                nn.Linear(input_size, 2048),
-                nn.ReLU(True),
-                nn.Linear(2048, 1024),
-                nn.ReLU(True),
-                nn.Linear(1024, 512),
-                nn.ReLU(True),
-            )
-            # Decoder
-            self.decoder = nn.Sequential(
-                nn.Linear(512, 1024),
-                nn.ReLU(True),
-                nn.Linear(1024, 2048),
-                nn.ReLU(True),
-                nn.Linear(2048, input_size),
-            )
-
-        def forward(self, x):
-            encoded = self.encoder(x)
-            decoded = self.decoder(encoded)
-            return decoded
-
-    # Initialize the model and load weights
-    model = DenoisingAutoencoder(input_size=3072).to(device)
-    model.load_state_dict(
-        torch.load("data/denoising_autoencoder.pth", map_location=device)
-    )
-    model.eval()
-    logger.info("Model loaded successfully.")
 
     # Encode the query embedding using the encoder
     with torch.no_grad():
@@ -97,39 +113,39 @@ def get_query(query: str, threshold=0.33, top_n=10):
             model.encoder(query_embedding_tensor).cpu().numpy()
         )  # Shape: (1, 512)
 
-    # Compute cosine similarities
-    logger.info("Computing cosine similarities...")
-
-    # Normalize embeddings
-    def normalize_embeddings(embeddings):
-        norms = np.linalg.norm(embeddings, axis=1, keepdims=True)
-        return embeddings / norms
-
+    # Normalize the query encoded vector
     query_encoded_norm = query_encoded / np.linalg.norm(query_encoded)
-    job_embeddings_norm = normalize_embeddings(reduced_embeddings)
+    query_encoded_norm = query_encoded_norm.astype("float32")
 
-    # Compute cosine similarity
-    similarities = np.dot(
-        job_embeddings_norm, query_encoded_norm.T
-    ).squeeze()  # Shape: (num_jobs,)
+    # Compute cosine similarities using FAISS index
+    k = min(top_n * 5, job_embeddings_norm.shape[0])  # Retrieve more than needed
+    D, I = index.search(query_encoded_norm, k)
 
-    # Filter and get top N results
-    indices = np.where(similarities >= threshold)[0]
+    # D is similarities, I is indices
+    similarities = D.flatten()
+    indices = I.flatten()
+
+    # Filter out similarities below threshold
+    valid = similarities >= threshold
+    similarities = similarities[valid]
+    indices = indices[valid]
+
     if len(indices) == 0:
         return []
 
-    # Get top N indices based on similarity scores
-    top_indices = similarities.argsort()[::-1]  # Descending order
-    top_indices = top_indices[:top_n]
+    # Get top N results
+    sorted_indices = np.argsort(-similarities)  # Sort in descending order
+    top_indices = indices[sorted_indices][:top_n]
+    top_similarities = similarities[sorted_indices][:top_n]
 
     # Prepare the results
     results = []
-    for idx in top_indices:
+    for idx, sim in zip(top_indices, top_similarities):
         job = {
             "job_id": data["job_id"][idx],
             "job_title": data["job_title"][idx],
             "job_description": data["job_description"][idx],
-            "similarity": float(similarities[idx]),
+            "similarity": float(sim),
         }
         results.append(job)
 
