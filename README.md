@@ -35,7 +35,7 @@
     - **Activation Function**: ReLU for each layer except the output layer
     - **Loss Function**: Mean Squared Error (MSE), as it’s typical for reconstruction tasks
     - **Optimizer**: Adam optimizer with:
-    - Learning rate (`lr`): \(1 \times 10^{-3}\)
+    - **Learning rate (`lr`)**: \(1 \times 10^{-3}\)
 
 
 * **A description of the training process, including a description of the loss function and why it makes sense to your problem**
