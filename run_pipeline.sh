@@ -39,3 +39,7 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "All scripts ran successfully."
+
+#  start flask api
+echo "Starting Flask API..."
+python matching_jobs_api/main.py
