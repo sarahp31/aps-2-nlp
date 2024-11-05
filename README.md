@@ -92,3 +92,48 @@ We improved the speed by moving model and data loading outside the function (to 
 
 ![Time of response](./images/latency.png)
 Figure 3: Time of response
+
+## Run the project locally
+
+To run the project locally, follow these steps:
+
+1. Clone the repository:
+
+```bash
+git clone https://github.com/sarahp31/aps-2-nlp
+```
+
+2. Give permissions to files:
+    
+```bash
+chmod +777 setup_git_hook.sh
+chmod +777 run_pipeline.sh
+```
+
+3. Run the setup script:
+
+```bash
+./setup_git_hook.sh
+```
+
+4. Give data permissions to the run script:
+
+```bash
+chmod 664 data/careers.db
+chmod 775 data/
+```
+
+5. Run the project pipeline installation, scrapping, embedding, and training:
+
+```bash
+./run_pipeline.sh
+```
+
+6. Run the API:
+
+```bash
+python matching_jobs_api/main.py
+```
+
+7. Access the API at `http://localhost:5000` in your browser and use like APS-1:
+- `http://localhost:5000/query?query=TEXTED_RESUME`
