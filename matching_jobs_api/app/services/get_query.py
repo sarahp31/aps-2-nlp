@@ -64,11 +64,21 @@ class DenoisingAutoencoder(nn.Module):
 
 
 # Initialize the model and load weights
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+logger.info("Loading model...")
+if torch.backends.mps.is_available():
+    device = torch.device("mps")
+elif torch.cuda.is_available():
+    device = torch.device("cuda")
+else:
+    device = torch.device("cpu")
+logger.info("Using device: %s", device)
 model = DenoisingAutoencoder(input_size=3072).to(device)
-model.load_state_dict(torch.load("data/denoising_autoencoder.pth", map_location=device))
-model.eval()
+loaded_model = torch.load("data/denoising_autoencoder.pth", map_location=device)
 logger.info("Model loaded successfully.")
+model.load_state_dict(loaded_model)
+logger.info("Model state dict loaded successfully.")
+model.eval()
+logger.info("Model ready for inference.")
 
 
 # Precompute normalized job embeddings
